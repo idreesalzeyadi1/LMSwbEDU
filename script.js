@@ -211,7 +211,7 @@ function renderTeachers(list) {
       </div>
 
       <button class="card-btn" onclick="openProfile(${teacher.id})">
-        Profile Dekhein
+        View Teacher Profile
       </button>
     `;
 
