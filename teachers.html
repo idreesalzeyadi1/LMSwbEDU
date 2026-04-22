@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduAcademy — All Teachers</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Page header ── */
+    .page-hero {
+      background: linear-gradient(135deg, #3C3489 0%, #5b4fcf 100%);
+      color: #fff;
+      padding: 6rem 1.5rem 3rem;
+      text-align: center;
+    }
+    .page-hero h1 { font-size: 2.2rem; margin-bottom: .5rem; }
+    .page-hero p  { opacity: .85; font-size: 1.05rem; }
+
+    /* ── Filters bar ── */
+    .teachers-page-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* ── Teacher table / list ── */
+    .teacher-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      margin-top: 2rem;
+    }
+
+    .teacher-row {
+      background: #fff;
+      border: 1px solid #e8e8f0;
+      border-radius: 14px;
+      padding: 1.4rem 1.6rem;
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+      transition: box-shadow .2s, transform .2s;
+    }
+    .teacher-row:hover {
+      box-shadow: 0 6px 20px rgba(60,52,137,.12);
+      transform: translateY(-2px);
+    }
+
+    /* Avatar */
+    .tr-avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+
+    /* Main info */
+    .tr-info { flex: 1; min-width: 0; }
+    .tr-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #1a1a2e;
+      margin-bottom: .15rem;
+    }
+    .tr-subject {
+      color: #3C3489;
+      font-size: .88rem;
+      font-weight: 600;
+      margin-bottom: .35rem;
+    }
+    .tr-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .tr-tag {
+      font-size: .75rem;
+      padding: .18rem .55rem;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .tr-tag-purple { background: #EEEDFE; color: #3C3489; }
+    .tr-tag-teal   { background: #E1F5EE; color: #085041; }
+
+    /* Stats column */
+    .tr-stats {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: .3rem;
+      flex-shrink: 0;
+      min-width: 130px;
+    }
+    .tr-rating { font-size: .95rem; color: #f59e0b; font-weight: 700; }
+    .tr-meta   { font-size: .8rem; color: #888; }
+    .tr-fee    { font-size: .92rem; font-weight: 700; color: #1a1a2e; }
+
+    /* Status badge */
+    .tr-status {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .8rem;
+      font-weight: 600;
+    }
+    .dot-online { width:8px; height:8px; border-radius:50%; background:#1D9E75; display:inline-block; }
+    .dot-busy   { width:8px; height:8px; border-radius:50%; background:#f59e0b; display:inline-block; }
+    .txt-online { color: #1D9E75; }
+    .txt-busy   { color: #f59e0b; }
+
+    /* Profile button */
+    .tr-btn {
+      background: #3C3489;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .55rem 1.1rem;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .2s;
+      text-decoration: none;
+    }
+    .tr-btn:hover { background: #5b4fcf; }
+
+    /* Summary count */
+    .results-count {
+      color: #888;
+      font-size: .9rem;
+      margin-bottom: .5rem;
+    }
+    .results-count span { color: #3C3489; font-weight: 700; }
+
+    /* Responsive */
+    @media (max-width: 620px) {
+      .teacher-row { flex-wrap: wrap; }
+      .tr-stats { align-items: flex-start; min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVBAR ── -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">EduAcademy</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="teachers.html" class="active">Teachers</a></li>
+      <li><a href="courses.html">Courses</a></li>
+      <li><a href="enroll.html">Enroll</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ── PAGE HERO ── -->
+  <div class="page-hero">
+    <h1>All Teachers</h1>
+    <p>Browse our 120+ verified and experienced teachers</p>
+  </div>
+
+  <!-- ── TEACHERS SECTION ── -->
+  <div class="teachers-page-section">
+
+    <!-- Filter Row -->
+    <div class="filters-row">
+      <select id="filterSubject" onchange="applyFilters()">
+        <option value="">All Subjects</option>
+        <option value="Mathematics">Mathematics</option>
+        <option value="Physics">Physics</option>
+        <option value="English">English</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Biology">Biology</option>
+      </select>
+      <select id="filterGrade" onchange="applyFilters()">
+        <option value="">All Grades</option>
+        <option value="Primary">Primary</option>
+        <option value="Matric">Matric</option>
+        <option value="O-Level">O-Level</option>
+        <option value="A-Level">A-Level</option>
+      </select>
+      <select id="filterType" onchange="applyFilters()">
+        <option value="">Online / Home</option>
+        <option value="Online">Online</option>
+        <option value="Home">Home</option>
+      </select>
+      <button class="reset-btn" onclick="resetFilters()">Reset</button>
+    </div>
+
+    <!-- Count -->
+    <p class="results-count" id="resultsCount"><span>6</span> teachers found</p>
+
+    <!-- Teacher List -->
+    <div class="teacher-list" id="teacherList"></div>
+
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo">EduAcademy</div>
+      <p class="footer-text">Pakistan's #1 Teacher Marketplace · Karachi, Pakistan</p>
+      <p class="footer-copy">© 2025 EduAcademy — All rights reserved</p>
+    </div>
+  </footer>
+
+  <script>
+    /* ── Teachers Data ── */
+    const teachers = [
+      {
+        id: 1,
+        initials: "AK",
+        name: "Ahmed Khan",
+        subject: "Mathematics",
+        grades: ["Matric", "O-Level", "A-Level"],
+        type: ["Online", "Home"],
+        experience: 10,
+        students: 120,
+        fee: "Rs.2,000",
+        rating: "4.9",
+        stars: "★★★★★",
+        status: "online",
+        bio: "10 years of teaching O-Level and A-Level Math. Cambridge board specialist with an interactive teaching style — solving problems step by step to ensure concepts are crystal clear. First demo class is free.",
+        review: '"Explains everything so well, I got an A* in my exams" — Ali R.',
+        avatarColor: "#EEEDFE",
+        avatarText: "#3C3489"
+      },
+      {
+        id: 2,
+        initials: "SF",
+        name: "Sara Fatima",
+        subject: "English",
+        grades: ["Primary", "Matric", "O-Level"],
+        type: ["Online", "Home"],
+        experience: 7,
+        students: 85,
+        fee: "Rs.1,500",
+        rating: "4.8",
+        stars: "★★★★★",
+        status: "busy",
+        bio: "7 years of teaching English Grammar, Composition and Literature. I help students speak and write English in a fun and interactive way.",
+        review: '"My English improved so much thanks to Sara ma\'am" — Hina S.',
+        avatarColor: "#E1F5EE",
+        avatarText: "#085041"
+      },
+      {
+        id: 3,
+        initials: "RA",
+        name: "Rizwan Ali",
+        subject: "Physics",
+        grades: ["Matric", "O-Level", "A-Level"],
+        type: ["Online"],
+        experience: 12,
+        students: 200,
+        fee: "Rs.2,500",
+        rating: "4.9",
+        stars: "★★★★★",
+        status: "online",
+        bio: "12 years of teaching Physics. I explain concepts using real-life examples. Specialized in ECAT and A-Level Physics. Guided 200+ students so far.",
+        review: '"Rizwan sir made Physics so easy for me" — Umar F.',
+        avatarColor: "#EEEDFE",
+        avatarText: "#3C3489"
+      },
+      {
+        id: 4,
+        initials: "NB",
+        name: "Nadia Baig",
+        subject: "Chemistry",
+        grades: ["Matric", "O-Level"],
+        type: ["Home", "Online"],
+        experience: 6,
+        students: 60,
+        fee: "Rs.1,800",
+        rating: "4.7",
+        stars: "★★★★☆",
+        status: "online",
+        bio: "Many students find Chemistry difficult, but my teaching makes everything clear. I cover Organic, Inorganic, and Physical Chemistry.",
+        review: '"Nadia ma\'am completely removed my fear of Chemistry" — Zara K.',
+        avatarColor: "#E1F5EE",
+        avatarText: "#085041"
+      },
+      {
+        id: 5,
+        initials: "TH",
+        name: "Tariq Hassan",
+        subject: "Mathematics",
+        grades: ["Primary", "Matric"],
+        type: ["Home"],
+        experience: 5,
+        students: 45,
+        fee: "Rs.1,200",
+        rating: "4.6",
+        stars: "★★★★☆",
+        status: "online",
+        bio: "Teaching Math for Primary and Matric level students. I first strengthen the fundamentals before moving to advanced topics, with patience for every student.",
+        review: '"My son was afraid of Math, now he actually enjoys it" — Parent',
+        avatarColor: "#FAEEDA",
+        avatarText: "#633806"
+      },
+      {
+        id: 6,
+        initials: "AM",
+        name: "Ayesha Malik",
+        subject: "Biology",
+        grades: ["Matric", "O-Level"],
+        type: ["Online", "Home"],
+        experience: 8,
+        students: 95,
+        fee: "Rs.1,700",
+        rating: "4.8",
+        stars: "★★★★★",
+        status: "busy",
+        bio: "I explain Biology using diagrams and visual methods. Also help with MCAT preparation. Online classes are held on Zoom.",
+        review: '"Ayesha ma\'am\'s notes are the best" — Fatima A.',
+        avatarColor: "#EEEDFE",
+        avatarText: "#3C3489"
+      }
+    ];
+
+    /* ── Render ── */
+    function renderList(list) {
+      const container = document.getElementById("teacherList");
+      const countEl   = document.getElementById("resultsCount");
+      container.innerHTML = "";
+      countEl.innerHTML   = `<span>${list.length}</span> teacher${list.length !== 1 ? "s" : ""} found`;
+
+      if (list.length === 0) {
+        container.innerHTML = `<p style="color:#aaa;text-align:center;padding:2rem;">No teachers found. Please reset your filters.</p>`;
+        return;
+      }
+
+      list.forEach(function(t) {
+        const gradeTags = t.grades.map(g =>
+          `<span class="tr-tag tr-tag-purple">${g}</span>`).join("");
+        const typeTags  = t.type.map(tp =>
+          `<span class="tr-tag tr-tag-teal">${tp}</span>`).join("");
+
+        const statusHTML = t.status === "online"
+          ? `<span class="dot-online"></span><span class="txt-online">Available</span>`
+          : `<span class="dot-busy"></span><span class="txt-busy">Busy</span>`;
+
+        const row = document.createElement("div");
+        row.className = "teacher-row";
+        row.innerHTML = `
+          <div class="tr-avatar" style="background:${t.avatarColor};color:${t.avatarText};">${t.initials}</div>
+
+          <div class="tr-info">
+            <div class="tr-name">${t.name}</div>
+            <div class="tr-subject">${t.subject}</div>
+            <div class="tr-tags">${gradeTags}${typeTags}</div>
+          </div>
+
+          <div class="tr-stats">
+            <div class="tr-rating">${t.stars} ${t.rating}</div>
+            <div class="tr-meta">${t.experience} yrs exp · ${t.students} students</div>
+            <div class="tr-fee">${t.fee}/hr</div>
+            <div class="tr-status">${statusHTML}</div>
+          </div>
+
+          <a class="tr-btn" href="index.html#enroll">Book Demo</a>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    /* ── Filters ── */
+    function applyFilters() {
+      const subject = document.getElementById("filterSubject").value;
+      const grade   = document.getElementById("filterGrade").value;
+      const type    = document.getElementById("filterType").value;
+
+      const filtered = teachers.filter(function(t) {
+        const matchSubject = !subject || t.subject === subject;
+        const matchGrade   = !grade   || t.grades.includes(grade);
+        const matchType    = !type    || t.type.includes(type);
+        return matchSubject && matchGrade && matchType;
+      });
+
+      renderList(filtered);
+    }
+
+    function resetFilters() {
+      document.getElementById("filterSubject").value = "";
+      document.getElementById("filterGrade").value   = "";
+      document.getElementById("filterType").value    = "";
+      renderList(teachers);
+    }
+
+    /* ── Navbar scroll effect ── */
+    window.addEventListener("scroll", function() {
+      document.getElementById("navbar").classList.toggle("scrolled", window.scrollY > 10);
+    });
+
+    const hamburger = document.getElementById("hamburger");
+    const navLinks  = document.querySelector(".nav-links");
+    if (hamburger) hamburger.addEventListener("click", () => navLinks.classList.toggle("open"));
+
+    /* ── Init ── */
+    renderList(teachers);
+  </script>
+
+</body>
+</html>
