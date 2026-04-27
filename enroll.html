@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduAcademy — Book Your Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:      #0d0d1a;
+      --ink2:     #1e1e38;
+      --purple:   #6c47ff;
+      --purple2:  #9b7bff;
+      --teal:     #00d4aa;
+      --teal2:    #00f5c4;
+      --gold:     #ffd166;
+      --surface:  #f4f3ff;
+      --card:     #ffffff;
+      --border:   rgba(108,71,255,.18);
+      --muted:    #6b6b90;
+      --radius:   18px;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--surface);
+      min-height: 100vh;
+      display: block;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .enroll-page-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    /* ── Animated mesh background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 20%, rgba(108,71,255,.13) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 90% 80%, rgba(0,212,170,.10) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,209,102,.07) 0%, transparent 70%);
+      z-index: 0;
+      animation: meshShift 12s ease-in-out infinite alternate;
+    }
+    @keyframes meshShift {
+      0%   { opacity: 1; transform: scale(1) rotate(0deg); }
+      100% { opacity: .85; transform: scale(1.04) rotate(1deg); }
+    }
+
+    /* ── Main wrapper ── */
+    .enroll-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1060px;
+    }
+
+    /* ── Section label ── */
+    .section-eyebrow {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .section-eyebrow span {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      background: rgba(108,71,255,.1);
+      color: var(--purple);
+      font-family: var(--font-head);
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: .35rem .9rem;
+      border-radius: 40px;
+      border: 1px solid rgba(108,71,255,.2);
+    }
+    .section-eyebrow .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); opacity:1; }
+      50%      { transform: scale(1.4); opacity:.7; }
+    }
+
+    .section-heading {
+      font-family: var(--font-head);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      color: var(--ink);
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: .6rem;
+    }
+    .section-heading em {
+      font-style: normal;
+      background: linear-gradient(120deg, var(--purple), var(--teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: .98rem;
+      margin-bottom: 2.8rem;
+    }
+
+    /* ── Card grid ── */
+    .enroll-card {
+      background: var(--card);
+      border-radius: 28px;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 80px rgba(108,71,255,.10), 0 4px 16px rgba(0,0,0,.06);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+    }
+
+    /* ════════════════════════════
+       LEFT PANEL
+    ════════════════════════════ */
+    .left-panel {
+      background: linear-gradient(155deg, var(--ink2) 0%, #2a1f6e 100%);
+      padding: 3rem 2.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative circles */
+    .left-panel::before,
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .left-panel::before {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(108,71,255,.35) 0%, transparent 70%);
+      top: -80px; right: -80px;
+    }
+    .left-panel::after {
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(0,212,170,.2) 0%, transparent 70%);
+      bottom: -40px; left: -40px;
+    }
+
+    .left-title {
+      font-family: var(--font-head);
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+      position: relative;
+      z-index: 1;
+    }
+    .left-title span {
+      background: linear-gradient(90deg, var(--teal), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .left-desc {
+      color: rgba(255,255,255,.65);
+      font-size: .9rem;
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Perks */
+    .perks-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+      position: relative;
+      z-index: 1;
+    }
+    .perk-item {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      opacity: 0;
+      transform: translateX(-16px);
+      animation: slideIn .5s forwards;
+    }
+    .perk-item:nth-child(1) { animation-delay: .1s; }
+    .perk-item:nth-child(2) { animation-delay: .2s; }
+    .perk-item:nth-child(3) { animation-delay: .3s; }
+    .perk-item:nth-child(4) { animation-delay: .4s; }
+    @keyframes slideIn {
+      to { opacity:1; transform:translateX(0); }
+    }
+    .perk-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .perk-text {
+      color: rgba(255,255,255,.85);
+      font-size: .88rem;
+      font-weight: 500;
+    }
+    .perk-text strong {
+      color: #fff;
+      display: block;
+      font-size: .92rem;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      gap: 1.2rem;
+      position: relative;
+      z-index: 1;
+      margin-top: auto;
+    }
+    .stat-pill {
+      flex: 1;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 14px;
+      padding: .8rem .6rem;
+      text-align: center;
+    }
+    .stat-pill .num {
+      font-family: var(--font-head);
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--teal);
+      display: block;
+    }
+    .stat-pill .lbl {
+      font-size: .7rem;
+      color: rgba(255,255,255,.55);
+      font-weight: 500;
+    }
+
+    /* ════════════════════════════
+       RIGHT PANEL — FORM
+    ════════════════════════════ */
+    .right-panel {
+      padding: 3rem 2.4rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Progress steps */
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 2rem;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex: 1;
+    }
+    .step-circle {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 2px solid #ddd;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem;
+      font-weight: 700;
+      color: #bbb;
+      background: #fff;
+      flex-shrink: 0;
+      transition: all .3s;
+    }
+    .step.active .step-circle {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(108,71,255,.2);
+    }
+    .step.done .step-circle {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+    .step-label {
+      font-size: .72rem;
+      font-weight: 600;
+      color: #bbb;
+      display: none;
+    }
+    .step.active .step-label { color: var(--purple); }
+    .step.done  .step-label  { color: var(--teal); }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: #eee;
+      margin: 0 .3rem;
+      border-radius: 2px;
+      transition: background .3s;
+    }
+    .step-line.done { background: var(--teal); }
+
+    /* Selected teacher banner */
+    .teacher-banner {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      background: linear-gradient(120deg, rgba(108,71,255,.06), rgba(0,212,170,.06));
+      border: 1px solid rgba(108,71,255,.15);
+      border-radius: 14px;
+      padding: .85rem 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    .tb-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--purple2));
+      color: #fff;
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: .85rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .tb-info { flex: 1; }
+    .tb-name { font-weight: 700; font-size: .88rem; color: var(--ink); }
+    .tb-sub  { font-size: .76rem; color: var(--muted); }
+    .tb-badge {
+      font-size: .7rem;
+      font-weight: 700;
+      background: rgba(0,212,170,.12);
+      color: #008c6e;
+      padding: .2rem .6rem;
+      border-radius: 20px;
+    }
+
+    /* Form fields */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .85rem;
+      margin-bottom: .85rem;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+    }
+    .field label {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      padding: .75rem 1rem;
+      border: 1.5px solid #e5e3f0;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-size: .9rem;
+      color: var(--ink);
+      background: #fafafa;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      width: 100%;
+      resize: vertical;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--purple);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(108,71,255,.08);
+    }
+    .field input::placeholder,
+    .field textarea::placeholder { color: #bbb; }
+
+    /* Submit button */
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(120deg, var(--purple) 0%, #8b5cf6 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+      margin-top: .5rem;
+      letter-spacing: .02em;
+    }
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.15) 50%, transparent 70%);
+      transform: translateX(-100%);
+      transition: transform .5s;
+    }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(108,71,255,.35); }
+    .submit-btn:hover::before { transform: translateX(100%); }
+    .submit-btn:active { transform: translateY(0); }
+
+    /* Trust badges */
+    .trust-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-top: 1.2rem;
+    }
+    .trust-badge {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .72rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .trust-badge svg { opacity: .6; }
+
+    /* ── Success state ── */
+    .success-panel {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 3rem 2rem;
+      gap: 1rem;
+      flex: 1;
+    }
+    .success-ring {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(0,212,170,.15), rgba(0,212,170,.3));
+      display: flex; align-items: center; justify-content: center;
+      animation: popIn .5s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .success-ring svg { stroke: var(--teal); }
+    .success-title {
+      font-family: var(--font-head);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .success-desc { color: var(--muted); font-size: .9rem; line-height: 1.6; }
+    .success-dash-btn {
+      display: inline-block;
+      margin-top: .5rem;
+      padding: .75rem 2rem;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+    .success-dash-btn:hover { background: var(--purple); transform: translateY(-2px); }
+
+    /* ── Responsive ── */
+    @media (max-width: 720px) {
+      .enroll-card { grid-template-columns: 1fr; }
+      .left-panel  { padding: 2rem 1.5rem; }
+      .right-panel { padding: 2rem 1.5rem; }
+      .form-grid   { grid-template-columns: 1fr; }
+      .stats-row   { gap: .6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <div class="nav-logo">EduAcademy</div>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="teachers.html">Teachers</a></li>
+    <li><a href="courses.html">Courses</a></li>
+    <li><a href="enroll.html" class="active">Enroll</a></li>
+  </ul>
+  <div id="navAuth"></div>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="enroll-page-content">
+<div class="enroll-wrapper">
+
+  <!-- Eyebrow + Heading -->
+  <div class="section-eyebrow">
+    <span><span class="dot"></span> Free Demo Available</span>
+  </div>
+  <h2 class="section-heading">Book Your <em>Free Demo</em> Class</h2>
+  <p class="section-sub">Fill in your details — your teacher will reach out within 24 hours</p>
+
+  <!-- Main card -->
+  <div class="enroll-card">
+
+    <!-- ── LEFT PANEL ── -->
+    <div class="left-panel">
+      <div class="left-title">
+        Start Learning<br/><span>Without Risk</span>
+      </div>
+      <p class="left-desc">
+        Connect with Pakistan's top verified teachers. Your first demo class is 100% free — no payment, no commitment.
+      </p>
+
+      <ul class="perks-list">
+        <li class="perk-item">
+          <div class="perk-icon">🎓</div>
+          <div class="perk-text">
+            <strong>100% Free Demo</strong>
+            First class costs you nothing
+          </div>
+        </li>
+        <li class="perk-item">
+          <div class="perk-icon">⚡</div>
+          <div class="perk-text">
+            <strong>24-Hour Response</strong>
+            Teacher contacts you within a day
+          </div>
+        </li>
+        <li class="perk-item">
+          <div class="perk-icon">🏠</div>
+          <div class="perk-text">
+            <strong>Online or Home Visit</strong>
+            You choose what works best
+          </div>
+        </li>
+        <li class="perk-item">
+          <div class="perk-icon">✅</div>
+          <div class="perk-text">
+            <strong>No Advance Payment</strong>
+            Pay only after you're satisfied
+          </div>
+        </li>
+      </ul>
+
+      <div class="stats-row">
+        <div class="stat-pill">
+          <span class="num">20+</span>
+          <span class="lbl">Teachers</span>
+        </div>
+        <div class="stat-pill">
+          <span class="num">20+</span>
+          <span class="lbl">Students</span>
+        </div>
+        <div class="stat-pill">
+          <span class="num">4.9★</span>
+          <span class="lbl">Rating</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RIGHT PANEL ── -->
+    <div class="right-panel">
+
+      <!-- Progress steps -->
+      <div class="progress-steps">
+        <div class="step done" id="step1">
+          <div class="step-circle">✓</div>
+          <span class="step-label">Teacher</span>
+        </div>
+        <div class="step-line done"></div>
+        <div class="step active" id="step2">
+          <div class="step-circle">2</div>
+          <span class="step-label">Details</span>
+        </div>
+        <div class="step-line" id="line2"></div>
+        <div class="step" id="step3">
+          <div class="step-circle">3</div>
+          <span class="step-label">Confirm</span>
+        </div>
+      </div>
+
+      <!-- Selected teacher banner -->
+      <div class="teacher-banner">
+        <div class="tb-avatar" id="bannerAvatar">AK</div>
+        <div class="tb-info">
+          <div class="tb-name" id="bannerName">Ahmed Khan — Mathematics</div>
+          <div class="tb-sub">View any teacher's profile to select them</div>
+        </div>
+        <span class="tb-badge">Selected</span>
+      </div>
+
+      <!-- Form -->
+      <form id="enrollForm" onsubmit="handleSubmit(event)">
+        <div class="form-grid">
+          <div class="field">
+            <label>Your Name</label>
+            <input type="text" placeholder="e.g. Ali Hassan" required/>
+          </div>
+          <div class="field">
+            <label>Phone Number</label>
+            <input type="tel" placeholder="03XX-XXXXXXX" required/>
+          </div>
+          <div class="field">
+            <label>Email Address</label>
+            <input type="email" placeholder="your@email.com"/>
+          </div>
+          <div class="field">
+            <label>Class Type</label>
+            <select required>
+              <option value="">Select type</option>
+              <option>Online</option>
+              <option>Home Visit</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Preferred Time</label>
+            <select required>
+              <option value="">Select time</option>
+              <option>Morning (8am–12pm)</option>
+              <option>Afternoon (12pm–4pm)</option>
+              <option>Evening (4pm–8pm)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Subject / Grade</label>
+            <select>
+              <option value="">Select subject</option>
+              <option>Mathematics</option>
+              <option>Physics</option>
+              <option>English</option>
+              <option>Chemistry</option>
+              <option>Biology</option>
+              <option>Computer Science</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>Additional Message (Optional)</label>
+            <textarea placeholder="Any specific topics, schedule preferences, or questions..." rows="3"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          🚀 &nbsp; Request My Free Demo Class
+        </button>
+
+        <!-- Trust badges -->
+        <div class="trust-row">
+          <span class="trust-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Secure & Private
+          </span>
+          <span class="trust-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Verified Teachers
+          </span>
+          <span class="trust-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            24-hr Response
+          </span>
+        </div>
+      </form>
+
+      <!-- Success panel (hidden) -->
+      <div class="success-panel" id="successPanel">
+        <div class="success-ring">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div class="success-title">You're All Set! 🎉</div>
+        <p class="success-desc">
+          Your demo class request has been sent.<br/>
+          Your teacher will contact you within <strong>24 hours</strong>.
+        </p>
+        <button class="success-dash-btn" onclick="alert('Dashboard coming soon!')">View My Dashboard →</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div> <!-- enroll-page-content end -->
+
+<script>
+  function handleSubmit(e) {
+    e.preventDefault();
+    // Animate step 3 as done
+    document.getElementById('step2').className = 'step done';
+    document.getElementById('step2').querySelector('.step-circle').textContent = '✓';
+    document.getElementById('line2').className = 'step-line done';
+    document.getElementById('step3').className = 'step active';
+    document.getElementById('step3').querySelector('.step-circle').textContent = '✓';
+
+    // Show success
+    setTimeout(() => {
+      document.getElementById('enrollForm').style.display = 'none';
+      document.querySelector('.teacher-banner').style.display = 'none';
+      document.querySelector('.progress-steps').style.display = 'none';
+      const sp = document.getElementById('successPanel');
+      sp.style.display = 'flex';
+    }, 400);
+  }
+  
+</script>
+<script>
+  // 1. URL se Teacher ka data nikalna
+  document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const teacherName = urlParams.get('teacher');
+    const subject = urlParams.get('subject');
+
+    // Initials banane ke liye logic (e.g. "Ahmed Khan" -> "AK")
+    let initials = "??";
+    if (teacherName) {
+      initials = teacherName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+
+    // UI update karna
+    if (teacherName) {
+      document.getElementById("bannerName").textContent = `${teacherName} — ${subject || 'General'}`;
+      document.getElementById("bannerAvatar").textContent = initials;
+    }
+  });
+
+  // 2. Form Submit Function
+  function handleSubmit(e) {
+    e.preventDefault();
+    
+    // Steps UI update karna
+    document.getElementById('step2').className = 'step done';
+    document.getElementById('step2').querySelector('.step-circle').textContent = '✓';
+    document.getElementById('line2').className = 'step-line done';
+    document.getElementById('step3').className = 'step active';
+    document.getElementById('step3').querySelector('.step-circle').textContent = '✓';
+
+    // Form hide karke success message dikhana
+    setTimeout(() => {
+      document.getElementById('enrollForm').style.display = 'none';
+      document.querySelector('.teacher-banner').style.display = 'none';
+      document.querySelector('.progress-steps').style.display = 'none';
+      const sp = document.getElementById('successPanel');
+      sp.style.display = 'flex';
+    }, 400);
+  }
+</script>
+
+<script type="module" src="auth.js"></script>
+</body>
+</html>

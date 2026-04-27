@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile — EduAcademy</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* =============================================
+       PROFILE PAGE SPECIFIC STYLES
+       ============================================= */
+
+    .profile-page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ---- Profile Header Card ---- */
+    .profile-header-card {
+      background: #fff;
+      border: 1px solid #e8e6e0;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Purple banner at top */
+    .profile-banner {
+      height: 90px;
+      background: linear-gradient(135deg, var(--purple-600), var(--purple-800));
+      position: relative;
+    }
+
+    /* Avatar overlapping the banner */
+    .profile-avatar-wrap {
+      position: absolute;
+      bottom: -30px;
+      left: 1.5rem;
+    }
+
+    .profile-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--purple-50);
+      color: var(--purple-800);
+      font-size: 1.6rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 4px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Info area below banner */
+    .profile-info-area {
+      padding: 2.5rem 1.5rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .profile-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .profile-email {
+      font-size: 0.85rem;
+      color: var(--gray-400);
+    }
+
+    .profile-phone {
+      font-size: 0.85rem;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+
+    /* Edit Profile button */
+    .edit-btn {
+      padding: 9px 18px;
+      background: var(--purple-50);
+      color: var(--purple-700);
+      border: 1px solid var(--purple-200);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .edit-btn:hover { background: var(--purple-200); }
+
+    /* ---- Stats strip ---- */
+    .profile-stats-strip {
+      display: flex;
+      border-top: 1px solid #e8e6e0;
+      padding: 1rem 1.5rem;
+      gap: 0;
+    }
+
+    .prof-stat {
+      flex: 1;
+      text-align: center;
+      border-right: 1px solid #e8e6e0;
+      padding: 0.25rem 0;
+    }
+
+    .prof-stat:last-child { border-right: none; }
+
+    .prof-stat-num {
+      display: block;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--purple-600);
+    }
+
+    .prof-stat-label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+
+    /* ---- Section cards ---- */
+    .profile-card {
+      background: #fff;
+      border: 1px solid #e8e6e0;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ---- Edit Profile Form ---- */
+    .edit-form {
+      display: none; /* JS se toggle */
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .edit-form.open { display: flex; }
+
+    .edit-input {
+      padding: 10px 14px;
+      border: 1.5px solid #d8d6d0;
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: #fafaf8;
+      color: #1a1a1a;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .edit-input:focus {
+      border-color: var(--purple-400);
+      box-shadow: 0 0 0 3px var(--purple-50);
+    }
+
+    .edit-input::placeholder { color: var(--gray-200); }
+
+    .save-btn {
+      padding: 10px 20px;
+      background: var(--purple-600);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      align-self: flex-start;
+      transition: background 0.2s;
+    }
+    .save-btn:hover { background: var(--purple-800); }
+
+    /* ---- Enrollment cards ---- */
+    .enroll-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 1rem;
+      border: 1px solid #e8e6e0;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: box-shadow 0.2s;
+    }
+
+    .enroll-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+    .enroll-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--purple-50);
+      color: var(--purple-800);
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .enroll-info { flex: 1; min-width: 0; }
+
+    .enroll-teacher {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #0f0f0f;
+    }
+
+    .enroll-detail {
+      font-size: 0.78rem;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+
+    .enroll-status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .status-pending  { background: #FEF3C7; color: #92400E; }
+    .status-active   { background: var(--teal-50); color: var(--teal-800); }
+    .status-complete { background: var(--gray-50); color: var(--gray-600); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--gray-400);
+    }
+
+    .empty-state p { margin-bottom: 1rem; font-size: 0.9rem; }
+
+    .empty-state a {
+      display: inline-block;
+      padding: 9px 20px;
+      background: var(--purple-600);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    /* Logout button */
+    .logout-btn {
+      padding: 10px 20px;
+      background: transparent;
+      color: #c0392b;
+      border: 1.5px solid #c0392b;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #c0392b;
+      color: #fff;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      z-index: 999;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success { background: var(--teal-600); }
+  </style>
+</head>
+<body>
+
+  <!-- =============================================
+       NAVBAR — same as index
+       ============================================= -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo"><a href="index.html" style="text-decoration:none;color:inherit;">EduAcademy</a></div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="teachers.html">Teachers</a></li>
+      <li><a href="courses.html">Courses</a></li>
+      <li><a href="enroll.html">Enroll</a></li>
+    </ul>
+    <div class="nav-auth" id="navAuth"></div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </nav>
+
+  <!-- =============================================
+       MAIN PROFILE PAGE
+       ============================================= -->
+  <main class="profile-page" id="profilePage">
+
+    <!-- ---- 1. Profile Header Card ---- -->
+    <div class="profile-header-card">
+
+      <!-- Purple top banner -->
+      <div class="profile-banner">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="profileAvatar">?</div>
+        </div>
+      </div>
+
+      <!-- Name, email, edit button -->
+      <div class="profile-info-area">
+        <div>
+          <div class="profile-name" id="profileName">Loading...</div>
+          <div class="profile-email" id="profileEmail"></div>
+          <div class="profile-phone" id="profilePhone"></div>
+        </div>
+        <button class="edit-btn" onclick="toggleEditForm()">✏️ Edit Profile</button>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="profile-stats-strip">
+        <div class="prof-stat">
+          <span class="prof-stat-num" id="statEnrolled">0</span>
+          <span class="prof-stat-label">Enrolled</span>
+        </div>
+        <div class="prof-stat">
+          <span class="prof-stat-num" id="statPending">0</span>
+          <span class="prof-stat-label">Pending</span>
+        </div>
+        <div class="prof-stat">
+          <span class="prof-stat-num" id="statCompleted">0</span>
+          <span class="prof-stat-label">Completed</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- 2. Edit Profile Form ---- -->
+    <div class="profile-card">
+      <div class="card-title">
+        Edit Profile
+        <span style="font-size:0.78rem; color:var(--gray-400); font-weight:400;">Update your details</span>
+      </div>
+      <div class="edit-form open" id="editForm">
+        <input class="edit-input" type="text"  id="editName"  placeholder="Full name *" required/>
+        <input class="edit-input" type="tel"   id="editPhone" placeholder="Phone number"/>
+        <input class="edit-input" type="text"  id="editCity"  placeholder="City (e.g. Karachi)"/>
+        <input class="edit-input" type="text"  id="editGrade" placeholder="Your grade/class (e.g. O-Level, Matric)"/>
+        <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- ---- 3. My Enrollments ---- -->
+    <div class="profile-card">
+      <div class="card-title">
+        My Enrollments
+        <a href="index.html#teachers" style="font-size:0.82rem; color:var(--purple-600); font-weight:600; text-decoration:none;">+ Find a Teacher</a>
+      </div>
+      <div id="enrollmentsList">
+        <!-- Yahan JS se enrollments load honge -->
+      </div>
+    </div>
+
+    <!-- ---- 4. Account Actions ---- -->
+    <div class="profile-card">
+      <div class="card-title">Account</div>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+
+  </main>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="auth.js"></script>
+  <script>
+    // =============================================
+    // PROFILE PAGE INIT
+    // Check login, load data
+    // =============================================
+    document.addEventListener('DOMContentLoaded', function () {
+
+      // Agar logged out hai to login pe bhejo
+      const user = getLoggedInUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      loadProfilePage(user);
+    });
+
+    // =============================================
+    // PROFILE DATA LOAD KARNA
+    // =============================================
+    function loadProfilePage(user) {
+
+      // Avatar — name ka pehla harf
+      const initials = user.name
+        ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+        : '?';
+      document.getElementById('profileAvatar').textContent = initials;
+
+      // Name, email, phone
+      document.getElementById('profileName').textContent  = user.name  || 'No name set';
+      document.getElementById('profileEmail').textContent = user.email || '';
+      document.getElementById('profilePhone').textContent = user.phone ? '📞 ' + user.phone : '';
+
+      // Pre-fill edit form
+      document.getElementById('editName').value  = user.name  || '';
+      document.getElementById('editPhone').value = user.phone || '';
+      document.getElementById('editCity').value  = user.city  || '';
+      document.getElementById('editGrade').value = user.grade || '';
+
+      // Enrollments load karo
+      loadEnrollments(user);
+    }
+
+    // =============================================
+    // ENROLLMENTS LOAD KARNA
+    // LocalStorage se enrollments padhna
+    // =============================================
+    function loadEnrollments(user) {
+      const key         = 'eduEnrollments_' + user.email;
+      const enrollments = JSON.parse(localStorage.getItem(key) || '[]');
+
+      // Stats update karo
+      const pending   = enrollments.filter(e => e.status === 'Pending').length;
+      const active    = enrollments.filter(e => e.status === 'Active').length;
+      const completed = enrollments.filter(e => e.status === 'Completed').length;
+
+      document.getElementById('statEnrolled').textContent  = enrollments.length;
+      document.getElementById('statPending').textContent   = pending;
+      document.getElementById('statCompleted').textContent = completed;
+
+      const container = document.getElementById('enrollmentsList');
+
+      // Agar koi enrollment nahi
+      if (enrollments.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>Abhi koi enrollment nahi hai.</p>
+            <a href="index.html#teachers">Teachers Browse Karein</a>
+          </div>`;
+        return;
+      }
+
+      // Har enrollment ka card banao
+      container.innerHTML = '';
+      enrollments.forEach(function (enr, i) {
+
+        const statusClass =
+          enr.status === 'Active'    ? 'status-active'   :
+          enr.status === 'Completed' ? 'status-complete'  :
+          'status-pending';
+
+        const card = document.createElement('div');
+        card.className = 'enroll-card';
+        card.innerHTML = `
+          <div class="enroll-avatar">${enr.teacherInitials || '?'}</div>
+          <div class="enroll-info">
+            <div class="enroll-teacher">${enr.teacherName} — ${enr.subject}</div>
+            <div class="enroll-detail">${enr.classType} · ${enr.preferredTime} · Enrolled on ${enr.date}</div>
+          </div>
+          <span class="enroll-status ${statusClass}">${enr.status}</span>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // =============================================
+    // EDIT FORM TOGGLE
+    // =============================================
+    function toggleEditForm() {
+      const form = document.getElementById('editForm');
+      form.classList.toggle('open');
+    }
+
+    // =============================================
+    // PROFILE SAVE KARNA
+    // =============================================
+    function saveProfile() {
+      const user = getLoggedInUser();
+      if (!user) return;
+
+      const name  = document.getElementById('editName').value.trim();
+      const phone = document.getElementById('editPhone').value.trim();
+      const city  = document.getElementById('editCity').value.trim();
+      const grade = document.getElementById('editGrade').value.trim();
+
+      if (!name) {
+        showToast('Name zaroor likhein!', 'error');
+        return;
+      }
+
+      // Updated user object
+      const updatedUser = { ...user, name, phone, city, grade };
+
+      // LocalStorage mein save karo
+      localStorage.setItem('eduCurrentUser', JSON.stringify(updatedUser));
+
+      // Users list bhi update karo
+      const users = JSON.parse(localStorage.getItem('eduUsers') || '[]');
+      const idx = users.findIndex(u => u.email === user.email);
+      if (idx !== -1) {
+        users[idx] = { ...users[idx], name, phone, city, grade };
+        localStorage.setItem('eduUsers', JSON.stringify(users));
+      }
+
+      // UI update karo
+      loadProfilePage(updatedUser);
+      showToast('Profile update ho gayi!', 'success');
+    }
+
+    // =============================================
+    // TOAST NOTIFICATION
+    // =============================================
+    function showToast(msg, type = '') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast show ' + type;
+      setTimeout(() => { toast.className = 'toast'; }, 3000);
+    }
+  </script>
+</body>
+</html>
