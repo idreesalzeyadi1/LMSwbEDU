@@ -1,80 +1,104 @@
 /* =============================================
    EDUACADEMY — script.js
-   Teachers data, cards, search, filter, modal
+   Teachers Firestore se fetch hote hain
    ============================================= */
 
-/* =============================================
-   1. TEACHERS DATA
-   ============================================= */
-const teachers = [
-  {
-    id: 1, initials: "AK", name: "Ahmed Khan",
-    subject: "Mathematics", grades: ["Matric","O-Level","A-Level"],
-    type: ["Online","Home"], experience: 10, students: 120,
-    fee: "Rs.2,000", rating: "4.9", stars: "★★★★★", status: "online",
-    bio: "10 saal se O-Level aur A-Level Math parha raha hun. Cambridge board specialist. Demo class bilkul free hai.",
-    review: '"Bohot achi tarah samjhate hain, mera result A* aa gaya" — Ali R.',
-    avatarColor: "#EEEDFE", avatarText: "#3C3489"
-  },
-  {
-    id: 2, initials: "SF", name: "Sara Fatima",
-    subject: "English", grades: ["Primary","Matric","O-Level"],
-    type: ["Online","Home"], experience: 7, students: 85,
-    fee: "Rs.1,500", rating: "4.8", stars: "★★★★★", status: "busy",
-    bio: "7 saal se English Grammar, Composition aur Literature parha rahi hun. Interactive aur fun style mein.",
-    review: '"Sara ma\'am ki wajah se meri English bohot improve hui" — Hina S.',
-    avatarColor: "#E1F5EE", avatarText: "#085041"
-  },
-  {
-    id: 3, initials: "RA", name: "Rizwan Ali",
-    subject: "Physics", grades: ["Matric","O-Level","A-Level"],
-    type: ["Online"], experience: 12, students: 200,
-    fee: "Rs.2,500", rating: "4.9", stars: "★★★★★", status: "online",
-    bio: "12 saal se Physics parha raha hun. Real life examples se explain karta hun. ECAT specialist.",
-    review: '"Rizwan sir ne Physics ko bohot aasan bana diya" — Umar F.',
-    avatarColor: "#EEEDFE", avatarText: "#3C3489"
-  },
-  {
-    id: 4, initials: "NB", name: "Nadia Baig",
-    subject: "Chemistry", grades: ["Matric","O-Level"],
-    type: ["Home","Online"], experience: 6, students: 60,
-    fee: "Rs.1,800", rating: "4.7", stars: "★★★★☆", status: "online",
-    bio: "Chemistry ko bohot log mushkil samjhte hain lekin meri teaching se sab clear ho jata hai.",
-    review: '"Nadia ma\'am ki wajah se mera Chemistry ka fear khatam ho gaya" — Zara K.',
-    avatarColor: "#E1F5EE", avatarText: "#085041"
-  },
-  {
-    id: 5, initials: "TH", name: "Tariq Hassan",
-    subject: "Mathematics", grades: ["Primary","Matric"],
-    type: ["Home"], experience: 5, students: 45,
-    fee: "Rs.1,200", rating: "4.6", stars: "★★★★☆", status: "online",
-    bio: "Primary aur Matric level ke liye Math. Bunyadi concepts strong karta hun pehle.",
-    review: '"Mera beta jo Math se darta tha, ab interest lene laga hai" — Parent',
-    avatarColor: "#FAEEDA", avatarText: "#633806"
-  },
-  {
-    id: 6, initials: "AM", name: "Ayesha Malik",
-    subject: "Biology", grades: ["Matric","O-Level"],
-    type: ["Online","Home"], experience: 8, students: 95,
-    fee: "Rs.1,700", rating: "4.8", stars: "★★★★★", status: "busy",
-    bio: "Biology ko diagrams aur visual methods se explain karti hun. MCAT preparation mein bhi help karti hun.",
-    review: '"Ayesha ma\'am ke notes sabse best hain" — Fatima A.',
-    avatarColor: "#EEEDFE", avatarText: "#3C3489"
-  }
-];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAN2slfT95-HBcd6agX-KjqMWnNBIw8GNU",
+  authDomain:        "eduacademy-c3c75.firebaseapp.com",
+  projectId:         "eduacademy-c3c75",
+  storageBucket:     "eduacademy-c3c75.firebasestorage.app",
+  messagingSenderId: "224117270680",
+  appId:             "1:224117270680:web:60f1b950cf2af3705cc8ed"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 
 /* =============================================
-   2. CURRENTLY OPEN TEACHER ID
+   AVATAR COLORS — subject ke hisaab se
    ============================================= */
+const avatarColors = {
+  "Mathematics": { bg: "#EEEDFE", text: "#3C3489" },
+  "Physics":     { bg: "#EEEDFE", text: "#3C3489" },
+  "English":     { bg: "#E1F5EE", text: "#085041" },
+  "Chemistry":   { bg: "#E1F5EE", text: "#085041" },
+  "Biology":     { bg: "#EEEDFE", text: "#3C3489" },
+  "Urdu":        { bg: "#FAEEDA", text: "#633806" },
+  "default":     { bg: "#F3F3F3", text: "#333333" }
+};
+
+function getAvatarColor(subject) {
+  return avatarColors[subject] || avatarColors["default"];
+}
+
+function getInitials(name) {
+  if (!name) return "?";
+  return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+}
+
+/* =============================================
+   TEACHERS ARRAY — Firestore se fill hoga
+   ============================================= */
+let teachers = [];
 let currentTeacherId = null;
 
 /* =============================================
-   3. PAGE LOAD
+   FIRESTORE SE TEACHERS FETCH KARO
    ============================================= */
-document.addEventListener("DOMContentLoaded", function () {
+async function fetchTeachers() {
+  try {
+    const snapshot = await getDocs(collection(db, "teachers"));
+    teachers = [];
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const colors = getAvatarColor(data.subject);
+
+      teachers.push({
+        id:          doc.id,
+        initials:    data.initials    || getInitials(data.name),
+        name:        data.name        || "Unknown",
+        subject:     data.subject     || "",
+        grades:      data.grades      || [],
+        type:        data.type        || [],
+        experience:  data.experience  || 0,
+        students:    data.students    || 0,
+        fee:         data.fee         || "Rs.0",
+        rating:      data.rating      ? String(data.rating) : "4.5",
+        stars:       data.stars       || "★★★★☆",
+        status:      data.status      || "online",
+        bio:         data.bio         || "",
+        review:      data.review      || "",
+        avatarColor: data.avatarColor || colors.bg,
+        avatarText:  data.avatarText  || colors.text,
+      });
+    });
+
+    return teachers;
+  } catch (error) {
+    console.error("Firestore fetch error:", error);
+    return [];
+  }
+}
+
+/* =============================================
+   PAGE LOAD
+   ============================================= */
+document.addEventListener("DOMContentLoaded", async function () {
+  const grid = document.getElementById("teachersGrid");
+  if (grid) grid.innerHTML = `<p style="text-align:center;color:#999;padding:2rem;grid-column:1/-1;">Teachers load ho rahe hain...</p>`;
+
+  await fetchTeachers();
   renderTeachers(teachers);
 
-  // Hero search enter key
+  if (document.getElementById("teacherList")) {
+    renderTeachersList();
+  }
+
   const searchInput = document.getElementById("heroSearch");
   if (searchInput) {
     searchInput.addEventListener("keypress", function (e) {
@@ -84,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /* =============================================
-   4. TEACHER CARDS RENDER KARNA
+   TEACHER CARDS RENDER — index.html
    ============================================= */
 function renderTeachers(list) {
   const grid      = document.getElementById("teachersGrid");
@@ -94,14 +118,15 @@ function renderTeachers(list) {
   grid.innerHTML = "";
 
   if (list.length === 0) {
+    grid.innerHTML = `<p style="text-align:center;color:#999;padding:2rem;grid-column:1/-1;">No teachers found </p>`;
     if (noResults) noResults.style.display = "block";
     return;
   }
   if (noResults) noResults.style.display = "none";
 
   list.forEach(function (teacher, index) {
-    const gradeTags = teacher.grades.map(g => `<span class="tag tag-purple">${g}</span>`).join("");
-    const typeTags  = teacher.type.map(t => `<span class="tag tag-teal">${t}</span>`).join("");
+    const gradeTags = (teacher.grades || []).map(g => `<span class="tag tag-purple">${g}</span>`).join("");
+    const typeTags  = (teacher.type   || []).map(t => `<span class="tag tag-teal">${t}</span>`).join("");
 
     const statusHTML = teacher.status === "online"
       ? `<span class="online-dot"></span><span class="status-online">Available</span>`
@@ -126,71 +151,124 @@ function renderTeachers(list) {
         <span>${teacher.experience} yrs exp</span> · <span>${teacher.fee}/hr</span> · <span>${teacher.students} students</span>
       </div>
       <div class="card-tags">${gradeTags}${typeTags}</div>
-      <button class="card-btn" onclick="openProfile(${teacher.id})">View Profile</button>
+      <button class="card-btn" onclick="openProfile('${teacher.id}')">View Profile</button>
     `;
     grid.appendChild(card);
   });
 }
 
 /* =============================================
-   5. SEARCH
+   TEACHER LIST RENDER — teachers.html
+   ============================================= */
+let visibleCount = 3;
+let currentData  = [];
+
+function renderTeachersList() {
+  currentData = [...teachers];
+  renderList();
+}
+
+function renderList() {
+  const container  = document.getElementById("teacherList");
+  const btn        = document.getElementById("seeMoreBtn");
+  const countSpan  = document.querySelector("#resultsCount span");
+  if (!container) return;
+
+  container.innerHTML = "";
+  if (countSpan) countSpan.textContent = currentData.length;
+
+  currentData.slice(0, visibleCount).forEach(t => {
+    const row = document.createElement("div");
+    row.className = "teacher-row";
+    row.innerHTML = `
+      <div class="tr-avatar" style="background:${t.avatarColor};color:${t.avatarText};">${t.initials}</div>
+      <div class="tr-info">
+        <div class="tr-name">${t.name}</div>
+        <div class="tr-subject">${t.subject}</div>
+      </div>
+      <div class="tr-stats">
+        <div class="tr-rating">${t.stars} ${t.rating}</div>
+        <div class="tr-fee">${t.fee}/hr</div>
+      </div>
+      <a class="tr-btn" href="enroll.html?teacher=${encodeURIComponent(t.name)}&subject=${encodeURIComponent(t.subject)}">Book Demo</a>
+    `;
+    container.appendChild(row);
+  });
+
+  if (btn) btn.style.display = visibleCount < currentData.length ? "inline-block" : "none";
+}
+
+function loadMore() {
+  visibleCount += 3;
+  renderList();
+}
+
+/* =============================================
+   SEARCH
    ============================================= */
 function doSearch() {
-  const query = (document.getElementById("heroSearch").value || "").toLowerCase().trim();
+  const query = (document.getElementById("heroSearch")?.value || "").toLowerCase().trim();
   if (!query) { renderTeachers(teachers); return; }
 
   const filtered = teachers.filter(t =>
     t.name.toLowerCase().includes(query) ||
     t.subject.toLowerCase().includes(query) ||
-    t.grades.some(g => g.toLowerCase().includes(query)) ||
-    t.type.some(tp => tp.toLowerCase().includes(query))
+    (t.grades || []).some(g => g.toLowerCase().includes(query)) ||
+    (t.type   || []).some(tp => tp.toLowerCase().includes(query))
   );
 
   renderTeachers(filtered);
-  const teacherSection = document.getElementById("teachers");
-  if (teacherSection) teacherSection.scrollIntoView({ behavior: "smooth" });
+  document.getElementById("teachers")?.scrollIntoView({ behavior: "smooth" });
 }
 
-/* =============================================
-   6. FILTER BY TAG
-   ============================================= */
 function filterByTag(tag) {
   const filtered = teachers.filter(t =>
-    t.grades.includes(tag) || t.type.includes(tag) || t.subject === tag
+    (t.grades || []).includes(tag) ||
+    (t.type   || []).includes(tag) ||
+    t.subject === tag
   );
   renderTeachers(filtered);
-  const teacherSection = document.getElementById("teachers");
-  if (teacherSection) teacherSection.scrollIntoView({ behavior: "smooth" });
+  document.getElementById("teachers")?.scrollIntoView({ behavior: "smooth" });
 }
 
-/* =============================================
-   7. DROPDOWN FILTERS
-   ============================================= */
 function applyFilters() {
-  const subject = document.getElementById("filterSubject").value;
-  const grade   = document.getElementById("filterGrade").value;
-  const type    = document.getElementById("filterType").value;
+  const subject = document.getElementById("filterSubject")?.value || "";
+  const grade   = document.getElementById("filterGrade")?.value   || "";
+  const type    = document.getElementById("filterType")?.value    || "";
+
+  if (document.getElementById("teacherList")) {
+    currentData = teachers.filter(t => !subject || t.subject === subject);
+    visibleCount = 3;
+    renderList();
+    return;
+  }
 
   const filtered = teachers.filter(t => {
     const matchSubject = !subject || t.subject === subject;
-    const matchGrade   = !grade   || t.grades.includes(grade);
-    const matchType    = !type    || t.type.includes(type);
+    const matchGrade   = !grade   || (t.grades || []).includes(grade);
+    const matchType    = !type    || (t.type   || []).includes(type);
     return matchSubject && matchGrade && matchType;
   });
   renderTeachers(filtered);
 }
 
 function resetFilters() {
-  document.getElementById("filterSubject").value = "";
-  document.getElementById("filterGrade").value   = "";
-  document.getElementById("filterType").value    = "";
-  if (document.getElementById("heroSearch"))
-    document.getElementById("heroSearch").value  = "";
-  renderTeachers(teachers);
+  ["filterSubject","filterGrade","filterType","heroSearch"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+
+  if (document.getElementById("teacherList")) {
+    currentData  = [...teachers];
+    visibleCount = 3;
+    renderList();
+  } else {
+    renderTeachers(teachers);
+  }
 }
 
 /* =============================================
-   8. PROFILE MODAL OPEN
+   PROFILE MODAL
    ============================================= */
 function openProfile(teacherId) {
   const teacher = teachers.find(t => t.id === teacherId);
@@ -198,39 +276,37 @@ function openProfile(teacherId) {
 
   currentTeacherId = teacherId;
 
-  document.getElementById("modalAvatar").textContent        = teacher.initials;
-  document.getElementById("modalAvatar").style.background   = teacher.avatarColor;
-  document.getElementById("modalAvatar").style.color        = teacher.avatarText;
-  document.getElementById("modalName").textContent          = teacher.name;
-  document.getElementById("modalSubjectGrade").textContent  = teacher.subject + " · " + teacher.grades.join(" · ");
-  document.getElementById("modalRating").textContent        = teacher.stars + " " + teacher.rating + " · " + teacher.students + " students";
-  document.getElementById("modalExp").textContent           = teacher.experience;
-  document.getElementById("modalStudents").textContent      = teacher.students;
-  document.getElementById("modalFee").textContent           = teacher.fee;
-  document.getElementById("modalBio").textContent           = teacher.bio;
-  document.getElementById("modalReview").textContent        = teacher.review;
+  document.getElementById("modalAvatar").textContent       = teacher.initials;
+  document.getElementById("modalAvatar").style.background  = teacher.avatarColor;
+  document.getElementById("modalAvatar").style.color       = teacher.avatarText;
+  document.getElementById("modalName").textContent         = teacher.name;
+  document.getElementById("modalSubjectGrade").textContent = teacher.subject + " · " + (teacher.grades || []).join(" · ");
+  document.getElementById("modalRating").textContent       = teacher.stars + " " + teacher.rating + " · " + teacher.students + " students";
+  document.getElementById("modalExp").textContent          = teacher.experience;
+  document.getElementById("modalStudents").textContent     = teacher.students;
+  document.getElementById("modalFee").textContent          = teacher.fee;
+  document.getElementById("modalBio").textContent          = teacher.bio;
+  document.getElementById("modalReview").textContent       = teacher.review;
 
   const statusEl = document.getElementById("modalStatus");
   if (teacher.status === "online") {
-    statusEl.innerHTML    = `<span class="online-dot"></span> Available`;
-    statusEl.style.color  = "var(--teal-600)";
+    statusEl.innerHTML   = `<span class="online-dot"></span> Available`;
+    statusEl.style.color = "var(--teal-600)";
   } else {
-    statusEl.textContent  = "Busy";
-    statusEl.style.color  = "var(--gray-400)";
+    statusEl.textContent = "Busy";
+    statusEl.style.color = "var(--gray-400)";
   }
 
   const tagsContainer = document.getElementById("modalTags");
   tagsContainer.innerHTML = "";
-  teacher.grades.forEach(g => {
+  (teacher.grades || []).forEach(g => {
     const span = document.createElement("span");
-    span.className = "tag tag-purple";
-    span.textContent = g;
+    span.className = "tag tag-purple"; span.textContent = g;
     tagsContainer.appendChild(span);
   });
-  teacher.type.forEach(tp => {
+  (teacher.type || []).forEach(tp => {
     const span = document.createElement("span");
-    span.className = "tag tag-teal";
-    span.textContent = tp;
+    span.className = "tag tag-teal"; span.textContent = tp;
     tagsContainer.appendChild(span);
   });
 
@@ -238,9 +314,6 @@ function openProfile(teacherId) {
   document.body.style.overflow = "hidden";
 }
 
-/* =============================================
-   9. MODAL CLOSE
-   ============================================= */
 function closeModalBtn() {
   document.getElementById("modalOverlay").classList.remove("open");
   document.body.style.overflow = "";
@@ -250,60 +323,50 @@ function closeModal(event) {
   if (event.target === document.getElementById("modalOverlay")) closeModalBtn();
 }
 
-/* =============================================
-   10. DEMO BOOK BUTTON — LOGIN CHECK
-   auth.js ka requireLoginForEnroll use karta hai
-   ============================================= */
-function handleDemoBook() {
-  if (!requireLoginForEnroll()) return; // auth.js mein defined hai
-  openEnrollFromModal();
-}
-
-/* =============================================
-   11. ENROLL FROM MODAL
-   Modal band karo, form mein teacher set karo
-   ============================================= */
 function openEnrollFromModal() {
   const teacher = teachers.find(t => t.id === currentTeacherId);
   closeModalBtn();
-
   if (teacher) {
     const formTeacher = document.getElementById("formTeacherName");
     if (formTeacher) formTeacher.textContent = "Teacher: " + teacher.name + " — " + teacher.subject;
   }
-
-  const enrollSection = document.getElementById("enroll");
-  if (enrollSection) enrollSection.scrollIntoView({ behavior: "smooth" });
+  document.getElementById("enroll")?.scrollIntoView({ behavior: "smooth" });
 }
 
 /* =============================================
-   12. FORM SUBMIT
+   FORM SUBMIT
    ============================================= */
 function submitForm(event) {
   event.preventDefault();
-
   const name  = document.getElementById("studentName").value.trim();
   const phone = document.getElementById("studentPhone").value.trim();
-
-  if (!name || !phone) {
-    alert("Name and phone number are required!");
-    return;
-  }
+  if (!name || !phone) { alert("Name and phone number are required!"); return; }
 
   const teacher = teachers.find(t => t.id === currentTeacherId);
-
-  // auth.js ka saveEnrollment call karo
-  if (typeof saveEnrollment === "function") {
-    saveEnrollment({
+  if (typeof window.saveEnrollment === "function") {
+    window.saveEnrollment({
       teacherName:     teacher ? teacher.name     : "Unknown Teacher",
       teacherInitials: teacher ? teacher.initials : "?",
       subject:         teacher ? teacher.subject  : "",
-      classType:       document.getElementById("classType").value,
-      preferredTime:   document.getElementById("preferredTime").value,
-      message:         document.getElementById("studentMessage").value,
+      classType:       document.getElementById("classType")?.value      || "",
+      preferredTime:   document.getElementById("preferredTime")?.value  || "",
+      message:         document.getElementById("studentMessage")?.value || "",
     });
   }
-
-  document.getElementById("enrollForm").style.display  = "none";
-  document.getElementById("successMsg").style.display  = "block";
+  document.getElementById("enrollForm").style.display = "none";
+  document.getElementById("successMsg").style.display = "block";
 }
+
+/* =============================================
+   GLOBAL EXPORTS
+   ============================================= */
+window.doSearch            = doSearch;
+window.filterByTag         = filterByTag;
+window.applyFilters        = applyFilters;
+window.resetFilters        = resetFilters;
+window.openProfile         = openProfile;
+window.closeModalBtn       = closeModalBtn;
+window.closeModal          = closeModal;
+window.openEnrollFromModal = openEnrollFromModal;
+window.submitForm          = submitForm;
+window.loadMore            = loadMore;

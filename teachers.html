@@ -6,7 +6,6 @@
   <title>EduAcademy — All Teachers</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Page header */
     .page-hero {
       background: linear-gradient(135deg, #3C3489 0%, #5b4fcf 100%);
       color: #fff;
@@ -64,25 +63,13 @@
       cursor: pointer; text-decoration: none; text-align: center;
     }
 
-    /* See More Button Styling */
-    .load-more-box {
-      text-align: center;
-      margin-top: 40px;
-    }
+    .load-more-box { text-align: center; margin-top: 40px; }
     .btn-load {
-      background: #fff;
-      color: #3C3489;
-      border: 2px solid #3C3489;
-      padding: 12px 35px;
-      font-weight: 700;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s;
+      background: #fff; color: #3C3489; border: 2px solid #3C3489;
+      padding: 12px 35px; font-weight: 700; border-radius: 10px;
+      cursor: pointer; transition: all 0.3s;
     }
-    .btn-load:hover {
-      background: #3C3489;
-      color: #fff;
-    }
+    .btn-load:hover { background: #3C3489; color: #fff; }
 
     @media (max-width: 620px) {
       .teacher-row { flex-wrap: wrap; }
@@ -115,93 +102,29 @@
         <option value="Mathematics">Mathematics</option>
         <option value="Physics">Physics</option>
         <option value="English">English</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Biology">Biology</option>
+        <option value="Urdu">Urdu</option>
       </select>
       <button class="reset-btn" onclick="resetFilters()">Reset</button>
     </div>
 
     <p class="results-count" id="resultsCount"><span>0</span> teachers found</p>
 
-    <div class="teacher-list" id="teacherList"></div>
+    <div class="teacher-list" id="teacherList">
+      <p style="text-align:center;color:#999;padding:2rem;">Teachers load ho rahe hain...</p>
+    </div>
 
     <div class="load-more-box">
-        <button id="seeMoreBtn" onclick="loadMore()" class="btn-load" style="display: none;">
-            See More Teachers
-        </button>
+      <button id="seeMoreBtn" onclick="loadMore()" class="btn-load" style="display:none;">
+        See More Teachers
+      </button>
     </div>
   </div>
 
-  <script src="script.js"></script> <script>
-    // Configuration
-    let visibleCount = 3; // TEST: 3 teachers k bad button aayega
-    let currentData = [];
-
-    // Initialize
-    window.onload = function() {
-        if (typeof teachers !== 'undefined') {
-            currentData = [...teachers];
-            renderList();
-        } else {
-            console.error("Error: 'teachers' array nahi mila. script.js check karein.");
-        }
-    };
-
-    function renderList() {
-        const container = document.getElementById("teacherList");
-        const btn = document.getElementById("seeMoreBtn");
-        const countText = document.querySelector("#resultsCount span");
-
-        if (!container) return;
-        container.innerHTML = "";
-        countText.textContent = currentData.length;
-
-        // Slice data
-        const displayed = currentData.slice(0, visibleCount);
-
-        displayed.forEach(t => {
-            const row = document.createElement("div");
-            row.className = "teacher-row";
-            row.innerHTML = `
-                <div class="tr-avatar" style="background:${t.avatarColor};color:${t.avatarText};">${t.initials}</div>
-                <div class="tr-info">
-                    <div class="tr-name">${t.name}</div>
-                    <div class="tr-subject">${t.subject}</div>
-                </div>
-                <div class="tr-stats">
-                    <div class="tr-rating">${t.stars} ${t.rating}</div>
-                    <div class="tr-fee">${t.fee}/hr</div>
-                </div>
-                <a class="tr-btn" href="enroll.html?teacher=${encodeURIComponent(t.name)}&subject=${encodeURIComponent(t.subject)}">Book Demo</a>
-            `;
-            container.appendChild(row);
-        });
-
-        // See More Button Logic
-        if (visibleCount < currentData.length) {
-            btn.style.display = "inline-block";
-        } else {
-            btn.style.display = "none";
-        }
-    }
-
-    function loadMore() {
-        visibleCount += 3; // Click pe 3 aur dikhao
-        renderList();
-    }
-
-    function applyFilters() {
-        const sub = document.getElementById("filterSubject").value;
-        currentData = teachers.filter(t => !sub || t.subject === sub);
-        visibleCount = 3; // Reset count
-        renderList();
-    }
-
-    function resetFilters() {
-        document.getElementById("filterSubject").value = "";
-        currentData = [...teachers];
-        visibleCount = 3;
-        renderList();
-    }
-  </script>
+  <!-- script.js type=module hai kyunki Firebase import use karta hai -->
+  <script type="module" src="script.js"></script>
   <script type="module" src="auth.js"></script>
+
 </body>
 </html>
