@@ -90,7 +90,7 @@ async function fetchTeachers() {
    ============================================= */
 document.addEventListener("DOMContentLoaded", async function () {
   const grid = document.getElementById("teachersGrid");
-  if (grid) grid.innerHTML = `<p style="text-align:center;color:#999;padding:2rem;grid-column:1/-1;">Teachers load ho rahe hain...</p>`;
+  if (grid) grid.innerHTML = `<p style="text-align:center;color:#999;padding:2rem;grid-column:1/-1;">Teachers loading...</p>`;
 
   await fetchTeachers();
   renderTeachers(teachers);

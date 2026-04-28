@@ -305,6 +305,43 @@
     }
 
     .toast.success { background: var(--teal-600); }
+
+    /* ---- Avatar camera button ---- */
+    .profile-avatar-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .avatar-camera-btn {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 26px;
+      height: 26px;
+      background: #fff;
+      border: 2px solid #e8e6e0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      transition: background 0.2s;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .avatar-camera-btn:hover { background: var(--purple-50); }
+
+    /* Upload progress */
+    .upload-progress {
+      display: none;
+      font-size: 0.78rem;
+      color: var(--purple-600);
+      margin-top: 4px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -336,6 +373,8 @@
       <div class="profile-banner">
         <div class="profile-avatar-wrap">
           <div class="profile-avatar" id="profileAvatar">?</div>
+          <label for="photoInput" class="avatar-camera-btn" title="Change photo">📷</label>
+          <input type="file" id="photoInput" accept="image/*" style="display:none;" />
         </div>
       </div>
 
@@ -403,155 +442,277 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <script type="module" src="auth.js"></script>
-  <script>
+  <script type="module">
     // =============================================
-    // PROFILE PAGE INIT
-    // Check login, load data
+    // FIREBASE IMPORTS
     // =============================================
-    document.addEventListener('DOMContentLoaded', function () {
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-      // Agar logged out hai to login pe bhejo
-      const user = getLoggedInUser();
-      if (!user) {
+    const firebaseConfig = {
+      apiKey: "AIzaSyAN2slfT95-HBcd6agX-KjqMWnNBIw8GNU",
+      authDomain:        "eduacademy-c3c75.firebaseapp.com",
+      projectId:         "eduacademy-c3c75",
+      storageBucket:     "eduacademy-c3c75.firebasestorage.app",
+      messagingSenderId: "224117270680",
+      appId:             "1:224117270680:web:60f1b950cf2af3705cc8ed"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db      = getFirestore(app);
+    const storage = getStorage(app);
+
+    // =============================================
+    // AUTH STATE — user ka wait karo
+    // =============================================
+    onAuthStateChanged(auth, async function(firebaseUser) {
+      if (!firebaseUser) {
         window.location.href = 'login.html';
         return;
       }
 
-      loadProfilePage(user);
+      // Firestore se user profile fetch karo
+      const userRef  = doc(db, "users", firebaseUser.uid);
+      const userSnap = await getDoc(userRef);
+
+      let userData;
+      if (userSnap.exists()) {
+        // Firestore mein data hai — use karo
+        userData = userSnap.data();
+      } else {
+        // Pehli baar — Firebase auth se basic data le k Firestore mein save karo
+        userData = {
+          name:  firebaseUser.displayName || "User",
+          email: firebaseUser.email,
+          phone: firebaseUser.phoneNumber || "",
+          city:  "",
+          grade: "",
+          uid:   firebaseUser.uid,
+          photo: firebaseUser.photoURL || ""
+        };
+        await setDoc(userRef, userData);
+      }
+
+      // localStorage bhi sync karo (navbar ke liye)
+      localStorage.setItem('eduCurrentUser', JSON.stringify({ ...userData, uid: firebaseUser.uid }));
+
+      loadProfilePage(userData, firebaseUser);
+      loadEnrollments(firebaseUser.uid);
     });
 
     // =============================================
     // PROFILE DATA LOAD KARNA
     // =============================================
-    function loadProfilePage(user) {
-
-      // Avatar — name ka pehla harf
+    function loadProfilePage(user, firebaseUser) {
       const initials = user.name
         ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
         : '?';
-      document.getElementById('profileAvatar').textContent = initials;
 
-      // Name, email, phone
+      // Photo ya initials
+      const avatarEl = document.getElementById('profileAvatar');
+      if (user.photo) {
+        avatarEl.innerHTML = `<img src="${user.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+      } else {
+        avatarEl.textContent = initials;
+      }
+
       document.getElementById('profileName').textContent  = user.name  || 'No name set';
       document.getElementById('profileEmail').textContent = user.email || '';
       document.getElementById('profilePhone').textContent = user.phone ? '📞 ' + user.phone : '';
 
-      // Pre-fill edit form
+      // Edit form pre-fill
       document.getElementById('editName').value  = user.name  || '';
       document.getElementById('editPhone').value = user.phone || '';
       document.getElementById('editCity').value  = user.city  || '';
       document.getElementById('editGrade').value = user.grade || '';
 
-      // Enrollments load karo
-      loadEnrollments(user);
+      // Save button ka onclick — firebaseUser pass karo
+      window._currentFirebaseUser = firebaseUser;
+
+      // Photo input wire up karo
+      document.getElementById('photoInput').onchange = (e) => uploadPhoto(e, firebaseUser);
     }
 
     // =============================================
-    // ENROLLMENTS LOAD KARNA
-    // LocalStorage se enrollments padhna
+    // PHOTO UPLOAD — Firebase Storage
     // =============================================
-    function loadEnrollments(user) {
-      const key         = 'eduEnrollments_' + user.email;
-      const enrollments = JSON.parse(localStorage.getItem(key) || '[]');
+    async function uploadPhoto(event, firebaseUser) {
+      const file = event.target.files[0];
+      if (!file) return;
 
-      // Stats update karo
-      const pending   = enrollments.filter(e => e.status === 'Pending').length;
-      const active    = enrollments.filter(e => e.status === 'Active').length;
-      const completed = enrollments.filter(e => e.status === 'Completed').length;
-
-      document.getElementById('statEnrolled').textContent  = enrollments.length;
-      document.getElementById('statPending').textContent   = pending;
-      document.getElementById('statCompleted').textContent = completed;
-
-      const container = document.getElementById('enrollmentsList');
-
-      // Agar koi enrollment nahi
-      if (enrollments.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <p>Abhi koi enrollment nahi hai.</p>
-            <a href="index.html#teachers">Teachers Browse Karein</a>
-          </div>`;
+      // Size check — max 3MB
+      if (file.size > 3 * 1024 * 1024) {
+        showToast('❌ Photo 3MB se chhoti honi chahiye!', 'error');
         return;
       }
 
-      // Har enrollment ka card banao
-      container.innerHTML = '';
-      enrollments.forEach(function (enr, i) {
+      const avatarEl  = document.getElementById('profileAvatar');
+      const cameraBtn = document.querySelector('.avatar-camera-btn');
+      cameraBtn.textContent = '⏳';
 
-        const statusClass =
-          enr.status === 'Active'    ? 'status-active'   :
-          enr.status === 'Completed' ? 'status-complete'  :
-          'status-pending';
+      try {
+        // Firebase Storage mein upload karo
+        const storageRef = ref(storage, `profile_photos/${firebaseUser.uid}`);
+        await uploadBytes(storageRef, file);
+        const photoURL = await getDownloadURL(storageRef);
 
-        const card = document.createElement('div');
-        card.className = 'enroll-card';
-        card.innerHTML = `
-          <div class="enroll-avatar">${enr.teacherInitials || '?'}</div>
-          <div class="enroll-info">
-            <div class="enroll-teacher">${enr.teacherName} — ${enr.subject}</div>
-            <div class="enroll-detail">${enr.classType} · ${enr.preferredTime} · Enrolled on ${enr.date}</div>
-          </div>
-          <span class="enroll-status ${statusClass}">${enr.status}</span>
-        `;
-        container.appendChild(card);
-      });
+        // Firebase Auth profile update karo
+        await updateProfile(firebaseUser, { photoURL });
+
+        // Firestore mein save karo
+        await updateDoc(doc(db, "users", firebaseUser.uid), { photo: photoURL });
+
+        // LocalStorage sync
+        const existing = JSON.parse(localStorage.getItem('eduCurrentUser') || '{}');
+        localStorage.setItem('eduCurrentUser', JSON.stringify({ ...existing, photo: photoURL }));
+
+        // Avatar UI update karo
+        avatarEl.innerHTML = `<img src="${photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+        cameraBtn.textContent = '📷';
+
+        showToast('✅ Photo update ho gayi!', 'success');
+
+      } catch (err) {
+        console.error("Photo upload error:", err);
+        cameraBtn.textContent = '📷';
+        showToast('❌ Upload fail hua. Dobara try karein.', 'error');
+      }
     }
 
     // =============================================
-    // EDIT FORM TOGGLE
+    // ENROLLMENTS — Firestore se load karo
     // =============================================
-    function toggleEditForm() {
-      const form = document.getElementById('editForm');
-      form.classList.toggle('open');
+    async function loadEnrollments(uid) {
+      const container = document.getElementById('enrollmentsList');
+      container.innerHTML = `<p style="color:#999;text-align:center;padding:1rem;">Load ho rahe hain...</p>`;
+
+      try {
+        const q        = query(collection(db, "enrollments"), where("uid", "==", uid));
+        const snapshot = await getDocs(q);
+
+        const enrollments = [];
+        snapshot.forEach(d => enrollments.push(d.data()));
+
+        // Stats
+        document.getElementById('statEnrolled').textContent  = enrollments.length;
+        document.getElementById('statPending').textContent   = enrollments.filter(e => e.status === 'Pending').length;
+        document.getElementById('statCompleted').textContent = enrollments.filter(e => e.status === 'Completed').length;
+
+        if (enrollments.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <p>You haven't enrolled in any classes yet.</p>
+              <a href="index.html#teachers">Find a teacher</a>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = '';
+        enrollments.forEach(function(enr) {
+          const statusClass =
+            enr.status === 'Active'    ? 'status-active'  :
+            enr.status === 'Completed' ? 'status-complete' :
+            'status-pending';
+
+          const card = document.createElement('div');
+          card.className = 'enroll-card';
+          card.innerHTML = `
+            <div class="enroll-avatar">${enr.teacherInitials || '?'}</div>
+            <div class="enroll-info">
+              <div class="enroll-teacher">${enr.teacherName} — ${enr.subject}</div>
+              <div class="enroll-detail">${enr.classType} · ${enr.preferredTime} · ${enr.date}</div>
+            </div>
+            <span class="enroll-status ${statusClass}">${enr.status}</span>
+          `;
+          container.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error("Enrollments fetch error:", err);
+        container.innerHTML = `<p style="color:#c00;text-align:center;">Enrollments load nahi hue.</p>`;
+      }
     }
 
     // =============================================
-    // PROFILE SAVE KARNA
+    // PROFILE SAVE — Firestore mein
     // =============================================
-    function saveProfile() {
-      const user = getLoggedInUser();
-      if (!user) return;
+    window.saveProfile = async function() {
+      const firebaseUser = window._currentFirebaseUser;
+      if (!firebaseUser) return;
 
       const name  = document.getElementById('editName').value.trim();
       const phone = document.getElementById('editPhone').value.trim();
       const city  = document.getElementById('editCity').value.trim();
       const grade = document.getElementById('editGrade').value.trim();
 
-      if (!name) {
-        showToast('Name zaroor likhein!', 'error');
-        return;
+      if (!name) { showToast('Name zaroor likhein!', 'error'); return; }
+
+      const saveBtn = document.querySelector('.save-btn');
+      saveBtn.textContent = 'Saving...';
+      saveBtn.disabled = true;
+
+      try {
+        // Firestore mein update karo
+        const userRef = doc(db, "users", firebaseUser.uid);
+        await updateDoc(userRef, { name, phone, city, grade });
+
+        // Firebase Auth display name bhi update karo
+        await updateProfile(firebaseUser, { displayName: name });
+
+        // LocalStorage sync
+        const existing = JSON.parse(localStorage.getItem('eduCurrentUser') || '{}');
+        const updated  = { ...existing, name, phone, city, grade };
+        localStorage.setItem('eduCurrentUser', JSON.stringify(updated));
+
+        // UI refresh
+        document.getElementById('profileName').textContent  = name;
+        document.getElementById('profilePhone').textContent = phone ? '📞 ' + phone : '';
+        // Avatar — photo ho to mat badlo, warna initials update karo
+        const existing2 = JSON.parse(localStorage.getItem('eduCurrentUser') || '{}');
+        if (!existing2.photo) {
+          document.getElementById('profileAvatar').textContent =
+            name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        showToast('✅ Profile Firestore mein save ho gayi!', 'success');
+      } catch (err) {
+        console.error("Profile save error:", err);
+        showToast('❌ Save nahi hua. Dobara try karein.', 'error');
+      } finally {
+        saveBtn.textContent = 'Save Changes';
+        saveBtn.disabled    = false;
       }
-
-      // Updated user object
-      const updatedUser = { ...user, name, phone, city, grade };
-
-      // LocalStorage mein save karo
-      localStorage.setItem('eduCurrentUser', JSON.stringify(updatedUser));
-
-      // Users list bhi update karo
-      const users = JSON.parse(localStorage.getItem('eduUsers') || '[]');
-      const idx = users.findIndex(u => u.email === user.email);
-      if (idx !== -1) {
-        users[idx] = { ...users[idx], name, phone, city, grade };
-        localStorage.setItem('eduUsers', JSON.stringify(users));
-      }
-
-      // UI update karo
-      loadProfilePage(updatedUser);
-      showToast('Profile update ho gayi!', 'success');
-    }
+    };
 
     // =============================================
-    // TOAST NOTIFICATION
+    // EDIT FORM TOGGLE
+    // =============================================
+    window.toggleEditForm = function() {
+      document.getElementById('editForm').classList.toggle('open');
+    };
+
+    // =============================================
+    // TOAST
     // =============================================
     function showToast(msg, type = '') {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
-      toast.className = 'toast show ' + type;
-      setTimeout(() => { toast.className = 'toast'; }, 3000);
+      toast.className   = 'toast show ' + type;
+      setTimeout(() => { toast.className = 'toast'; }, 3500);
     }
+
+    // =============================================
+    // LOGOUT — auth.js ka use karo
+    // =============================================
+    window.handleLogout = async function() {
+      const { getAuth, signOut } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+      await signOut(getAuth());
+      localStorage.removeItem('eduCurrentUser');
+      window.location.href = 'index.html';
+    };
   </script>
 </body>
 </html>

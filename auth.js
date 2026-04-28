@@ -22,6 +22,13 @@ import {
   onAuthStateChanged,
   updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  collection,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAN2slfT95-HBcd6agX-KjqMWnNBIw8GNU",
@@ -35,6 +42,7 @@ const firebaseConfig = {
 const app      = initializeApp(firebaseConfig);
 const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
+const db       = getFirestore(app);
 
 /* =============================================
    2. CURRENT USER LENA
@@ -51,7 +59,7 @@ function getLoggedInUser() {
    3. USER LOCALSTORAGE MEIN SAVE KARNA
    Firebase user object se local object banao
    ============================================= */
-function saveUserLocally(firebaseUser) {
+async function saveUserLocally(firebaseUser) {
   const user = {
     name:     firebaseUser.displayName || "User",
     email:    firebaseUser.email,
@@ -63,6 +71,22 @@ function saveUserLocally(firebaseUser) {
     isGoogle: firebaseUser.providerData?.[0]?.providerId === "google.com"
   };
   localStorage.setItem('eduCurrentUser', JSON.stringify(user));
+
+  // Firestore mein bhi save karo (pehli baar ya update)
+  try {
+    await setDoc(doc(db, "users", firebaseUser.uid), {
+      name:  user.name,
+      email: user.email,
+      phone: user.phone,
+      photo: user.photo,
+      uid:   user.uid,
+      city:  user.city,
+      grade: user.grade
+    }, { merge: true }); // merge: true — existing data overwrite nahi hoga
+  } catch(err) {
+    console.error("User Firestore save error:", err);
+  }
+
   return user;
 }
 
@@ -290,24 +314,34 @@ function requireLoginForEnroll() {
 
 /* =============================================
    12. ENROLLMENT SAVE KARNA
-   LocalStorage mein — profile pe dikhai dega
+   Firestore mein save hoga — profile pe dikhai dega
    ============================================= */
-function saveEnrollment(enrollData) {
+async function saveEnrollment(enrollData) {
   const user = getLoggedInUser();
   if (!user) return;
 
-  const key         = 'eduEnrollments_' + user.email;
-  const enrollments = JSON.parse(localStorage.getItem(key) || '[]');
-
-  enrollments.push({
+  const enrollment = {
     ...enrollData,
+    uid:    user.uid,
+    email:  user.email,
     status: 'Pending',
     date:   new Date().toLocaleDateString('en-PK', {
       day: 'numeric', month: 'short', year: 'numeric'
     })
-  });
+  };
 
-  localStorage.setItem(key, JSON.stringify(enrollments));
+  try {
+    // Firestore mein save karo
+    await addDoc(collection(db, "enrollments"), enrollment);
+    console.log("Enrollment Firestore mein save ho gaya!");
+  } catch (err) {
+    console.error("Enrollment save error:", err);
+    // Fallback: localStorage mein save karo
+    const key         = 'eduEnrollments_' + user.email;
+    const enrollments = JSON.parse(localStorage.getItem(key) || '[]');
+    enrollments.push(enrollment);
+    localStorage.setItem(key, JSON.stringify(enrollments));
+  }
 }
 
 /* =============================================
